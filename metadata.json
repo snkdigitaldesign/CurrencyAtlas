@@ -1,0 +1,5 @@
+{
+  "name": "CurrencyAtlas",
+  "description": "Real-time exchange rates and currency converter.",
+  "requestFramePermissions": ["geolocation"]
+}
