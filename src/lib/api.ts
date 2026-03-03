@@ -13,22 +13,36 @@ export interface PairResponse {
   time_last_update_utc: string;
 }
 
+const apiKey = process.env.NEXT_PUBLIC_EXCHANGE_API_KEY;
+
 export const fetchLatestRates = async (base: string): Promise<ExchangeRateResponse> => {
-  const res = await fetch(`/api/exchange/${base}`);
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || errorData.error || "Failed to fetch rates");
+  if (!apiKey || apiKey === "MY_EXCHANGE_API_KEY" || apiKey === "") {
+    throw new Error("API key not configured. Please set NEXT_PUBLIC_EXCHANGE_API_KEY.");
   }
-  return res.json();
+
+  const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/${base}`);
+  const data = await res.json();
+  
+  if (data.result === "error") {
+    throw new Error(data["error-type"] || "Failed to fetch rates");
+  }
+  
+  return data;
 };
 
 export const fetchPairRate = async (base: string, target: string): Promise<PairResponse> => {
-  const res = await fetch(`/api/history/${base}/${target}`);
-  if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.message || errorData.error || "Failed to fetch pair rate");
+  if (!apiKey || apiKey === "MY_EXCHANGE_API_KEY" || apiKey === "") {
+    throw new Error("API key not configured.");
   }
-  return res.json();
+
+  const res = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/pair/${base}/${target}`);
+  const data = await res.json();
+
+  if (data.result === "error") {
+    throw new Error(data["error-type"] || "Failed to fetch pair rate");
+  }
+
+  return data;
 };
 
 // Simulated historical data for Recharts since free tier API is limited
